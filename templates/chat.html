@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Healthcare Chatbot : Your Health Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 900px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .chat-header h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 28px;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .chat-header h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, #4a90e2, #67b26f);
+            border-radius: 2px;
+        }
+        .chat-box {
+            height: 450px;
+            overflow-y: auto;
+            border: 1px solid #edf2f7;
+            padding: 20px;
+            border-radius: 15px;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+        .message {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in-out;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 5px rgba(74, 144, 226, 0.2);
+        }
+        .bot-message {
+            background: white;
+            color: #2d3748;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid #edf2f7;
+        }
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #edf2f7;
+        }
+        .text-input-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .text-input-container input[type="text"] {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .text-input-container input[type="text"]:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+        .text-input-container button {
+            background: #4a90e2;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(74, 144, 226, 0.2);
+        }
+        .text-input-container button:hover {
+            background: #357abd;
+            transform: translateY(-1px);
+        }
+        .microphone-button {
+            background: white;
+            border: 2px solid #e2e8f0;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            color: #4a90e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .microphone-button:hover {
+            border-color: #4a90e2;
+            background: #f8fafc;
+        }
+        .microphone-button.active {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        .audio-response-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 5px;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        input:checked + .slider {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        #recordingIndicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            margin-left: 5px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        /* Custom scrollbar */
+        .chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+        .chat-box::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+        .logout-button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .logout-button:hover {
+            background: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Healthcare Chatbot : Your Health Assistant</h1>
+            <a href="/logout" class="logout-button">Logout</a>
+        </div>
+        <div class="chat-box" id="chatBox">
+            <div class="message bot-message">
+                Hello, I'm your Personal Healthcare Chatbot 
+            </div>
+            <div class="message bot-message">
+                how can I help you today?
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="text-input-container">
+                <button class="microphone-button" id="microphoneButton" onclick="toggleSpeechInput()">🎤</button>
+                <span id="recordingIndicator" style="display: none; width: 10px; height: 10px; border-radius: 50%; background-color: red; margin-left: 5px;"></span>
+                <input type="text" id="userInput" placeholder="Type your message">
+                <button onclick="sendMessage()">➤</button>
+            </div>
+            <div class="audio-response-toggle">
+                Audio response
+                <label class="switch">
+                    <input type="checkbox" id="audioResponseToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let audioResponseEnabled = true; // Default to true as per image
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        const microphoneButton = document.getElementById('microphoneButton');
+        const recordingIndicator = document.getElementById('recordingIndicator');
+        const audioResponseToggle = document.getElementById('audioResponseToggle');
+
+        // Web Speech API setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechSynthesis = window.speechSynthesis;
+        let recognition;
+        let utterance;
+        let voicesLoaded = false;
+
+        // Load voices once they are available
+        SpeechSynthesis.onvoiceschanged = () => {
+            voicesLoaded = true;
+            console.log("SpeechSynthesis voices loaded.");
+        };
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                console.log("Speech recognition started.");
+                microphoneButton.classList.add('active');
+                recordingIndicator.style.display = 'inline-block';
+                userInput.placeholder = "Listening...";
+            };
+
+            recognition.onresult = (event) => {
+                const speechResult = event.results[0][0].transcript;
+                userInput.value = speechResult;
+                console.log("Speech recognized: ", speechResult);
+                // Automatically send message after speech recognition result
+                sendMessage();
+            };
+
+            recognition.onend = () => {
+                console.log("Speech recognition ended.");
+                microphoneButton.classList.remove('active');
+                recordingIndicator.style.display = 'none';
+                userInput.placeholder = "Type your message";
+                isRecording = false; // Reset recording state
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error: ", event.error);
+                microphoneButton.classList.remove('active');
+                recordingIndicator.style.display = 'none';
+                userInput.placeholder = "Type your message";
+                isRecording = false; // Reset recording state
+                addMessage("Error with speech recognition. Please try again.", false);
+            };
+        } else {
+            console.warn("Web Speech API (SpeechRecognition) not supported in this browser.");
+            microphoneButton.style.display = 'none'; // Hide microphone button if not supported
+        }
+
+        audioResponseToggle.addEventListener('change', () => {
+            audioResponseEnabled = audioResponseToggle.checked;
+            // If turning off, stop any current speech
+            if (!audioResponseEnabled && SpeechSynthesis.speaking) {
+                SpeechSynthesis.cancel();
+            }
+        });
+
+        function addMessage(message, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.innerHTML = message; // Use innerHTML to allow for bolding, etc.
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function speakText(text) {
+            if (!audioResponseEnabled) {
+                console.log("Audio response disabled by toggle.");
+                return;
+            }
+
+            if (SpeechSynthesis) {
+                // Cancel any ongoing speech
+                if (SpeechSynthesis.speaking) {
+                    SpeechSynthesis.cancel();
+                }
+
+                utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+
+                // Wait for voices to be loaded before speaking
+                const speakNow = () => {
+                    if (voicesLoaded) {
+                        SpeechSynthesis.speak(utterance);
+                    } else {
+                        // Fallback if voices aren't loaded immediately, try again shortly
+                        setTimeout(speakNow, 100); 
+                    }
+                };
+                speakNow();
+            } else {
+                console.warn("Web Speech API (SpeechSynthesis) not supported in this browser.");
+            }
+        }
+
+        async function toggleSpeechInput() {
+            isRecording = !isRecording;
+            if (isRecording) {
+                if (recognition) {
+                    recognition.start();
+                } else {
+                    alert("Speech recognition not supported in your browser.");
+                    isRecording = false; // Reset state if not supported
+                }
+            } else {
+                if (recognition) {
+                    recognition.stop();
+                }
+            }
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            
+            if (!message && !isRecording) return; // Only send if there's text or recording is active
+
+            if (message) {
+                addMessage(message, true);
+                userInput.value = '';
+            }
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    }),
+                });
+
+                const data = await response.json();
+                addMessage(data.response, false);
+                // Only speak if the audio response is enabled on the frontend
+                if (data.speech_text && audioResponseEnabled) {
+                    speakText(data.speech_text);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error processing your request.', false);
+            }
+        }
+
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>  
