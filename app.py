@@ -5,6 +5,7 @@ import re
 from pymongo import MongoClient
 from datetime import datetime
 from urllib.parse import quote_plus
+import certifi
 
 app = Flask(__name__)
 
@@ -12,7 +13,8 @@ app = Flask(__name__)
 username_mongo = quote_plus("akila_12345")
 password_mongo = quote_plus("Akila@2004")
 mongo_uri = f"mongodb+srv://{username_mongo}:{password_mongo}@cluster0.icdphl8.mongodb.net/"
-client = MongoClient(mongo_uri)
+client = MongoClient("mongodb+srv://akila_12345:Akila@2004@cluster0.icdphl8.mongodb.net/healthcare_chatbot?retryWrites=true&w=majority",tls = True,
+tlsCAFile=certifi.where())
 db = client.healthcare_chatbot # Choose a database name
 users_collection = db.users
 feedback_collection = db.feedback
@@ -138,4 +140,4 @@ def chat():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
