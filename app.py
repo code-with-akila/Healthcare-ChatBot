@@ -12,11 +12,10 @@ app = Flask(__name__)
 # MongoDB Atlas Connection
 username_mongo = quote_plus("akila_12345")
 password_mongo = quote_plus("Akila@2004")
-mongo_uri = f"mongodb+srv://{username_mongo}:{password_mongo}@cluster0.icdphl8.mongodb.net/"
-client = MongoClient("mongodb+srv://akila_12345:Akila@2004@cluster0.icdphl8.mongodb.net/healthcare_chatbot?retryWrites=true&w=majority",tls = True,
-tlsCAFile=certifi.where())
+mongo_uri = os.environ.get("MONGO_URI")
+client = MongoClient(MONGO_URI,tls=True,tlsCAFile=certifi.where())
 db = client.healthcare_chatbot # Choose a database name
-users_collection = db.users
+users_collection = db["users"]
 feedback_collection = db.feedback
 
 # Configure the API key
